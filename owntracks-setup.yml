@@ -33,6 +33,11 @@
           ot_repo: "bookworm"
        when: "ot_repo == 'noble'"
 
+     - name: "coerce ot_repo to trixie for Ubuntu 26.04 (resolute)"
+       set_fact:
+          ot_repo: "trixie"
+       when: "ot_repo == 'resolute'"
+
      - name: "system: template out sys.info"
        template:
           src: files/system/sys.info.j2
@@ -43,7 +48,7 @@
        assert:
            that:
              - "ansible_version.full is version('2.17', '>=')"
-             - "ansible_distribution_release in [ 'bookworm', 'trixie', 'jammy', 'mantic', 'noble' ]"
+             - "ansible_distribution_release in [ 'bookworm', 'trixie', 'jammy', 'mantic', 'noble', 'resolute' ]"
              - "'community.general.htpasswd' is community.general.a_module"
            # - "'community.crypto.x509_certificate_info' is community.crypto.a_module"
 

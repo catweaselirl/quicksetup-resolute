@@ -35,7 +35,9 @@ if ! [ -x $ADIR/bin/ansible-playbook ]; then
 
 	# install ansible core into a python venv
 	sudo -u ansible python3 -mvenv $ADIR
-	sudo -u ansible $ADIR/bin/pip install 'ansible-core<2.19'
+	# no upper pin: pip resolves per-interpreter (jammy/py3.10 -> 2.17.x,
+	# resolute/py3.14 -> 2.20+, which is the first core supporting py3.14)
+	sudo -u ansible $ADIR/bin/pip install 'ansible-core'
 
 	sudo -u ansible $ADIR/bin/ansible-galaxy collection install \
 		community.general \
