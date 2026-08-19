@@ -224,7 +224,7 @@
      - name: "mosquitto: permit AppArmor read access to the certificates"
        copy:
           content: |
-            # {{ ansible_managed }}
+            # Ansible managed
             # the distribution profile allows reading below {{ mosquittodir }}
             # only; our certificates live elsewhere.
             file {{ otdir }}/tls/** r,
