@@ -216,11 +216,28 @@
 #  |_| |_| |_|\___/|___/\__, |\__,_|_|\__|\__\___/ 
 #                          |_|                     
 
+     - name: "mosquitto: detect AppArmor profile (Ubuntu 26.04 and later)"
+       stat:
+          path: /etc/apparmor.d/mosquitto
+       register: mosquitto_apparmor
+
+     - name: "mosquitto: permit AppArmor read access to the certificates"
+       copy:
+          content: |
+            # {{ ansible_managed }}
+            # the distribution profile allows reading below {{ mosquittodir }}
+            # only; our certificates live elsewhere.
+            file {{ otdir }}/tls/** r,
+          dest: /etc/apparmor.d/local/mosquitto
+          mode: 0444
+       when: mosquitto_apparmor.stat.exists
+       notify: reload_apparmor
+
      - name: "mosquitto: template configuration for OwnTracks"
        template:
           src: files/mosquitto/owntracks.conf.j2
           dest: "{{ mosquittodir }}/conf.d/owntracks.conf"
-          owner: "{{ mosquitto_user }}"
+          owner: root
           group: "{{ mosquitto_group }}"
           mode: 0440
           # validate: "mosquitto --test-config " # FIXME: in 2.1
@@ -230,7 +247,7 @@
        template:
           src: files/mosquitto/mosquitto.pw.j2
           dest: "{{ mosquittodir }}/mosquitto.pw"
-          owner: "{{ mosquitto_user }}"
+          owner: root
           group: "{{ mosquitto_group }}"
           mode: 0440
        notify: restart_mosquitto
@@ -249,7 +266,7 @@
        template:
           src: files/mosquitto/mosquitto.acl.j2
           dest: "{{ mosquittodir }}/mosquitto.acl"
-          owner: "{{ mosquitto_user }}"
+          owner: root
           group: "{{ mosquitto_group }}"
           mode: 0440
           # validate: "mosquitto --test-config " # FIXME: in 2.1
@@ -470,6 +487,9 @@
 #
 
   handlers:
+
+     - name: reload_apparmor
+       command: apparmor_parser -r /etc/apparmor.d/mosquitto
 
      - name: restart_mosquitto
        service:
